@@ -1,0 +1,14 @@
+from: OLEG DANILOV
+invoice_number: 1
+invoice_date: March 15, 2019
+bill_to: Customer Name
+payment_from: March 1, 2019
+payment_to: March 15, 2019
+total: 0.00
+rows:
+  - project: First Project
+    hours: 0.00
+    rate: 0.00
+  - project: Second Project
+    hours: 0.00
+    rate: 0.00
