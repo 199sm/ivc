@@ -2,27 +2,35 @@
 #include "file_utils.h"
 #include "template_utils.h"
 #include "unzip_utils.h"
+#include "options.h"
 
-int main(void) {
-    const char *docx_path = "../template.docx";
-    const char *result_docx_path = "../invoice.docx";
-    const char *target_file = "word/document.xml";
+int main(int argc, char *argv[]) {
+    const struct options* opts = get_options(argc, argv);
 
-    const int copy_result = copy_file(docx_path, result_docx_path);
-    if (copy_result != 0) {
-        fprintf(stderr, "Error copying file: %s\n", result_docx_path);
-        return 1;
+    if (opts == NULL) {
+        return EXIT_FAILURE;
     }
 
-    char *content = unzip_file_to_memory(result_docx_path, target_file);
+    if (opts->exit_code >= 0) {
+        return opts->exit_code;
+    }
+
+    const char *target_file = "word/document.xml";
+
+    const int copy_result = copy_file(opts->template_path, opts->output_path);
+    if (copy_result != 0) {
+        fprintf(stderr, "Error copying file: %s\n", opts->output_path);
+        return EXIT_FAILURE;
+    }
+
+    char *content = unzip_file_to_memory(opts->output_path, target_file);
 
     if (content == NULL)
-        return 1;
+        return EXIT_FAILURE;
 
-    const char *config_path = "../config.yaml";
     yaml_document_t doc;
 
-    if (read_config(config_path, &doc)) {
+    if (read_config(opts->config_path, &doc)) {
         const yaml_node_t *root = yaml_document_get_root_node(&doc);
         if (root && root->type == YAML_MAPPING_NODE) {
             for (const yaml_node_pair_t *pair = root->data.mapping.pairs.start;
@@ -46,7 +54,7 @@ int main(void) {
 
                     const char *template_row = get_last_w_tr_block(content);
                     if (template_row == NULL)
-                        return 1;
+                        return EXIT_FAILURE;
 
                     for (const yaml_node_item_t *item = value_node->data.sequence.items.start;
                          item < value_node->data.sequence.items.top;
@@ -88,13 +96,13 @@ int main(void) {
         yaml_document_delete(&doc);
     }
 
-    const int write_result = write_file_to_zip(result_docx_path, target_file, content);
+    const int write_result = write_file_to_zip(opts->output_path, target_file, content);
     if (write_result != 0) {
         fprintf(stderr, "Error writing file: %s\n", target_file);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     free(content);
 
-    return 0;
+    return EXIT_SUCCESS;
 }

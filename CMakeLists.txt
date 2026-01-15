@@ -8,7 +8,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBZIP REQUIRED libzip)
 pkg_check_modules(LIBYAML REQUIRED yaml-0.1)
 
-add_executable(ivc main.c config_utils.c file_utils.c template_utils.c unzip_utils.c)
+add_executable(ivc main.c config_utils.c file_utils.c template_utils.c unzip_utils.c options.c)
 
 target_include_directories(ivc PRIVATE ${LIBZIP_INCLUDE_DIRS} ${LIBYAML_INCLUDE_DIRS})
 target_link_libraries(ivc ${LIBZIP_LIBRARIES} ${LIBYAML_LIBRARIES})
